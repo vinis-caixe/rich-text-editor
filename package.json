@@ -9,8 +9,9 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
-    "slate": "^0.44.9",
-    "slate-react": "^0.21.15",
+    "slate": "^0.94.1",
+    "slate-history": "^0.93.0",
+    "slate-react": "^0.97.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
