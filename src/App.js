@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { createEditor, Editor } from 'slate'
 import { Slate, Editable, withReact} from 'slate-react'
 
@@ -19,17 +19,19 @@ const CustomEditor = {
     },
 }
 
-const initialValue = [
-    {
-        type: 'paragraph',
-        children: [
-            { text: 'A line of text in a paragraph.' },
-        ],
-    },
-]
-
 const App = () => {
     const [editor] = useState(() => withReact(createEditor()))
+
+    const initialValue = useMemo(
+        () => 
+            JSON.parse(localStorage.getItem('content')) || [
+                {
+                    type: 'paragraph',
+                    children: [{ text: 'A line of text in a paragraph.' }],
+                },
+            ],
+        [],
+    )
 
     const renderElement = useCallback(props => {
         switch (props.element.type){
@@ -43,41 +45,53 @@ const App = () => {
     }, [])
 
     return (
-        <Slate editor={editor} initialValue={initialValue}>
-            <div>
-                <button
-                    onMouseDown={event => {
-                        event.preventDefault()
-                        CustomEditor.toggleBoldMark(editor)
-                    }}
-                >
-                    Bold
-                </button>
-                
-            </div>
-            <Editable 
-                editor={editor}
-                renderElement={renderElement}
-                renderLeaf={renderLeaf}
-                onKeyDown={event => {
-                    if(!event.ctrlKey){
-                        return
-                    }
-
-                    switch(event.key){
-
-                        case 'b': {
+        <Slate 
+            editor={editor} 
+            initialValue={initialValue}
+            onChange={value => {
+                const isAstChange = editor.operations.some(
+                    op => 'set_selection' !== op.type
+                )
+                if(isAstChange){
+                    const content = JSON.stringify(value)
+                    localStorage.setItem('content', content)
+                }
+            }}
+        >
+                <div>
+                    <button
+                        onMouseDown={event => {
                             event.preventDefault()
                             CustomEditor.toggleBoldMark(editor)
-                            break
+                        }}
+                    >
+                        Bold
+                    </button>
+                    
+                </div>
+                <Editable 
+                    editor={editor}
+                    renderElement={renderElement}
+                    renderLeaf={renderLeaf}
+                    onKeyDown={event => {
+                        if(!event.ctrlKey){
+                            return
                         }
 
-                        default:
-                            
-                    }
+                        switch(event.key){
 
-                }}
-            />
+                            case 'b': {
+                                event.preventDefault()
+                                CustomEditor.toggleBoldMark(editor)
+                                break
+                            }
+
+                            default:
+                                
+                        }
+
+                    }}
+                />
         </Slate>
     )
 }
