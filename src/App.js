@@ -1,11 +1,17 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import { createEditor, Editor } from 'slate'
 import { Slate, Editable, withReact} from 'slate-react'
+import { withHistory } from 'slate-history' 
 
 const CustomEditor = {
     isBoldMarkActive(editor){
         const marks = Editor.marks(editor)
         return marks ? marks.bold === true : false
+    },
+
+    isItalicMarkActive(editor){
+        const marks = Editor.marks(editor)
+        return marks ? marks.italic === true : false
     },
 
     toggleBoldMark(editor){
@@ -17,10 +23,20 @@ const CustomEditor = {
             Editor.addMark(editor, 'bold', true)
         }
     },
+
+    toggleItalicMark(editor){
+        const isActive = CustomEditor.isItalicMarkActive(editor)
+        if(isActive){
+            Editor.removeMark(editor, 'italic')
+        }
+        else{
+            Editor.addMark(editor, 'italic', true)
+        }
+    }
 }
 
 const App = () => {
-    const [editor] = useState(() => withReact(createEditor()))
+    const [editor] = useState(() => withReact(withHistory(createEditor())))
 
     const initialValue = useMemo(
         () => 
@@ -67,7 +83,14 @@ const App = () => {
                     >
                         Bold
                     </button>
-                    
+                    <button
+                        onMouseDown={event => {
+                            event.preventDefault()
+                            CustomEditor.toggleItalicMark(editor)
+                        }}
+                    >
+                        Italic
+                    </button>
                 </div>
                 <Editable 
                     editor={editor}
@@ -86,6 +109,12 @@ const App = () => {
                                 break
                             }
 
+                            case 'i': {
+                                event.preventDefault()
+                                CustomEditor.toggleItalicMark(editor)
+                                break
+                            }
+
                             default:
                                 
                         }
@@ -96,13 +125,17 @@ const App = () => {
     )
 }
 
-const Leaf = props => {
+const Leaf = ({ attributes, children, leaf }) => {
+    if(leaf.bold){
+        children = <strong>{children}</strong>
+    }
+    if(leaf.italic){
+        children = <em>{children}</em>
+    }
+
     return (
-        <span
-            {...props.attributes}
-            style={{ fontWeight: props.leaf.bold ? 'bold' : 'normal' }}
-        >
-            {props.children}
+        <span{...attributes}>
+            {children}
         </span>
     )
 }
