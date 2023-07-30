@@ -4,35 +4,37 @@ import { Slate, Editable, withReact} from 'slate-react'
 import { withHistory } from 'slate-history' 
 
 const CustomEditor = {
-    isBoldMarkActive(editor){
+    isMarkActive(editor, mark){
         const marks = Editor.marks(editor)
-        return marks ? marks.bold === true : false
+        switch(mark){
+            case 'bold': {
+                return marks ? marks.bold === true : false
+            }
+            case 'italic': {
+                return marks ? marks.italic === true : false
+            }
+            case 'code': {
+                return marks ? marks.code === true : false
+            }   
+            case 'underline': {
+                return marks ? marks.underline === true : false
+            }
+            default: {
+                return false
+            }
+        }
     },
 
-    isItalicMarkActive(editor){
-        const marks = Editor.marks(editor)
-        return marks ? marks.italic === true : false
-    },
-
-    toggleBoldMark(editor){
-        const isActive = CustomEditor.isBoldMarkActive(editor)
+    toggleMark(editor, mark){
+        const isActive = CustomEditor.isMarkActive(editor, mark)
         if(isActive){
-            Editor.removeMark(editor, 'bold')
+            Editor.removeMark(editor, mark)
         }
         else{
-            Editor.addMark(editor, 'bold', true)
-        }
-    },
-
-    toggleItalicMark(editor){
-        const isActive = CustomEditor.isItalicMarkActive(editor)
-        if(isActive){
-            Editor.removeMark(editor, 'italic')
-        }
-        else{
-            Editor.addMark(editor, 'italic', true)
+            Editor.addMark(editor, mark, true)
         }
     }
+
 }
 
 const App = () => {
@@ -64,6 +66,7 @@ const App = () => {
         <Slate 
             editor={editor} 
             initialValue={initialValue}
+            spellCheck={false}
             onChange={value => {
                 const isAstChange = editor.operations.some(
                     op => 'set_selection' !== op.type
@@ -78,7 +81,7 @@ const App = () => {
                     <button
                         onMouseDown={event => {
                             event.preventDefault()
-                            CustomEditor.toggleBoldMark(editor)
+                            CustomEditor.toggleMark(editor, 'bold')
                         }}
                     >
                         Bold
@@ -86,10 +89,26 @@ const App = () => {
                     <button
                         onMouseDown={event => {
                             event.preventDefault()
-                            CustomEditor.toggleItalicMark(editor)
+                            CustomEditor.toggleMark(editor, 'italic')
                         }}
                     >
                         Italic
+                    </button>
+                    <button
+                        onMouseDown={event => {
+                            event.preventDefault()
+                            CustomEditor.toggleMark(editor, 'code')
+                        }}
+                    >
+                        Code
+                    </button>
+                    <button
+                        onMouseDown={event => {
+                            event.preventDefault()
+                            CustomEditor.toggleMark(editor, 'underline')
+                        }}
+                    >
+                        Underline
                     </button>
                 </div>
                 <Editable 
@@ -102,19 +121,26 @@ const App = () => {
                         }
 
                         switch(event.key){
-
                             case 'b': {
                                 event.preventDefault()
-                                CustomEditor.toggleBoldMark(editor)
+                                CustomEditor.toggleMark(editor, 'bold')
                                 break
                             }
-
                             case 'i': {
                                 event.preventDefault()
-                                CustomEditor.toggleItalicMark(editor)
+                                CustomEditor.toggleMark(editor, 'italic')
                                 break
                             }
-
+                            case '`': {
+                                event.preventDefault()
+                                CustomEditor.toggleMark(editor, 'code')
+                                break
+                            }
+                            case 'u': {
+                                event.preventDefault()
+                                CustomEditor.toggleMark(editor, 'underline')
+                                break
+                            }
                             default:
                                 
                         }
@@ -131,6 +157,12 @@ const Leaf = ({ attributes, children, leaf }) => {
     }
     if(leaf.italic){
         children = <em>{children}</em>
+    }
+    if(leaf.code){
+        children = <code>{children}</code>
+    }
+    if(leaf.underline){
+        children = <u>{children}</u>
     }
 
     return (
