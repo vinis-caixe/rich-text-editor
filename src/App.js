@@ -1,28 +1,32 @@
 import React, { useCallback, useMemo, useState } from 'react'
-import { createEditor, Editor } from 'slate'
-import { Slate, Editable, withReact} from 'slate-react'
+import { createEditor, Editor, Element, Transforms } from 'slate'
+import { Slate, Editable, withReact } from 'slate-react'
 import { withHistory } from 'slate-history' 
+
+const LIST_TYPES = ['numbered-list', 'bulleted-list']
+const TEXT_ALIGN_TYPES = ['left', 'right', 'center', 'justify']
 
 const CustomEditor = {
     isMarkActive(editor, mark){
         const marks = Editor.marks(editor)
-        switch(mark){
-            case 'bold': {
-                return marks ? marks.bold === true : false
-            }
-            case 'italic': {
-                return marks ? marks.italic === true : false
-            }
-            case 'code': {
-                return marks ? marks.code === true : false
-            }   
-            case 'underline': {
-                return marks ? marks.underline === true : false
-            }
-            default: {
-                return false
-            }
-        }
+        return marks ? marks[mark] === true : false
+    },
+
+    isBlockActive(editor, block, blockType = 'type'){
+        const { selection } = editor
+        if(!selection) return false
+
+        const [match] = Array.from(
+            Editor.nodes(editor, {
+                at: Editor.unhangRange(editor, selection),
+                match: n => 
+                    !Editor.isEditor(n) &&
+                    Element.isElement(n) &&
+                    n[blockType] === block,
+            })
+        )
+
+        return !!match
     },
 
     toggleMark(editor, mark){
@@ -32,6 +36,41 @@ const CustomEditor = {
         }
         else{
             Editor.addMark(editor, mark, true)
+        }
+    },
+
+    toggleBlock(editor, block){
+        const isActive = CustomEditor.isBlockActive(
+            editor,
+            block,
+            TEXT_ALIGN_TYPES.includes(block)
+        )
+        const isList = LIST_TYPES.includes(block)
+
+        Transforms.unwrapNodes(editor, {
+            match: n =>
+                !Editor.isEditor(n) &&
+                Element.isElement(n) &&
+                LIST_TYPES.includes(n.type) &&
+                !TEXT_ALIGN_TYPES.includes(block),
+            split: true,
+        })
+        let newProperties = Element
+        if(TEXT_ALIGN_TYPES.includes(block)){
+            newProperties = {
+                align: isActive ? undefined : block,
+            }
+        }
+        else{
+            newProperties = {
+                type: isActive ? 'paragraph' : isList ? 'list-item' : block,
+            }
+        }
+        Transforms.setNodes(editor, newProperties)
+
+        if(!isActive && isList){
+            const format = { type: block, children: [] }
+            Transforms.wrapNodes(editor, format)
         }
     }
 
@@ -52,9 +91,32 @@ const App = () => {
     )
 
     const renderElement = useCallback(props => {
+        const style = { textAlign: props.element.align }
         switch (props.element.type){
+            case 'bulleted-list':
+                return (
+                    <ul style={style} {...props.attributes}>
+                        {props.children}
+                    </ul>
+                )
+            case 'list-item':
+                return (
+                    <li style={style} {...props.attributes}>
+                        {props.children}
+                    </li>
+                )
+            case 'numbered-list':
+                return (
+                    <ol style={style} {...props.attributes}>
+                        {props.children}
+                    </ol>
+                )
             default:
-                return <DefaultEement {...props} />
+                return (
+                    <p style={style} {...props.attributes}>
+                        {props.children}
+                    </p>
+                )
         }
     }, [])
 
@@ -110,11 +172,44 @@ const App = () => {
                     >
                         Underline
                     </button>
+                    <button
+                        onMouseDown={event => {
+                            event.preventDefault()
+                            CustomEditor.toggleBlock(editor, 'left')
+                        }}
+                    >
+                        Left
+                    </button>
+                    <button
+                        onMouseDown={event => {
+                            event.preventDefault()
+                            CustomEditor.toggleBlock(editor, 'center')
+                        }}
+                    >
+                        Center
+                    </button>
+                    <button
+                        onMouseDown={event => {
+                            event.preventDefault()
+                            CustomEditor.toggleBlock(editor, 'right')
+                        }}
+                    >
+                        Right
+                    </button>
+                    <button
+                        onMouseDown={event => {
+                            event.preventDefault()
+                            CustomEditor.toggleBlock(editor, 'justify')
+                        }}
+                    >
+                        Justify
+                    </button>
                 </div>
                 <Editable 
                     editor={editor}
                     renderElement={renderElement}
                     renderLeaf={renderLeaf}
+                    placeholder="Enter some rich text..."
                     onKeyDown={event => {
                         if(!event.ctrlKey){
                             return
@@ -170,10 +265,6 @@ const Leaf = ({ attributes, children, leaf }) => {
             {children}
         </span>
     )
-}
-
-const DefaultEement = props => {
-    return <p {...props.attributes}>{props.children}</p>
 }
 
 export default App
