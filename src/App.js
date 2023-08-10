@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react'
 import { createEditor, Editor, Element, Transforms } from 'slate'
 import { Slate, Editable, withReact } from 'slate-react'
 import { withHistory } from 'slate-history' 
+import Header from './components/Header'
 
 const LIST_TYPES = ['numbered-list', 'bulleted-list']
 const TEXT_ALIGN_TYPES = ['left', 'right', 'center', 'justify']
@@ -43,7 +44,7 @@ const CustomEditor = {
         const isActive = CustomEditor.isBlockActive(
             editor,
             block,
-            TEXT_ALIGN_TYPES.includes(block)
+            TEXT_ALIGN_TYPES.includes(block) ? 'align' : 'type'
         )
         const isList = LIST_TYPES.includes(block)
 
@@ -139,6 +140,7 @@ const App = () => {
                 }
             }}
         >
+                <Header/>
                 <div>
                     <button
                         onMouseDown={event => {
@@ -204,6 +206,22 @@ const App = () => {
                     >
                         Justify
                     </button>
+                    <button
+                        onMouseDown={event => {
+                            event.preventDefault()
+                            CustomEditor.toggleBlock(editor, 'bulleted-list')
+                        }}
+                    >
+                        Bulleted List
+                    </button>
+                    <button
+                        onMouseDown={event => {
+                            event.preventDefault()
+                            CustomEditor.toggleBlock(editor, 'numbered-list')
+                        }}
+                    >
+                        Numbered List
+                    </button>
                 </div>
                 <Editable 
                     editor={editor}
@@ -267,4 +285,4 @@ const Leaf = ({ attributes, children, leaf }) => {
     )
 }
 
-export default App
+export default App;
