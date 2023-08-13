@@ -1,8 +1,12 @@
 import React, { useCallback, useMemo, useState } from 'react'
+import { FaBold, FaItalic, FaCode, FaUnderline,
+     FaAlignLeft, FaAlignCenter, FaAlignRight, FaAlignJustify,
+     FaListUl, FaListOl } from 'react-icons/fa'
 import { createEditor, Editor, Element, Transforms } from 'slate'
 import { Slate, Editable, withReact } from 'slate-react'
 import { withHistory } from 'slate-history' 
 import Header from './components/Header'
+import './App.css'
 
 const LIST_TYPES = ['numbered-list', 'bulleted-list']
 const TEXT_ALIGN_TYPES = ['left', 'right', 'center', 'justify']
@@ -140,126 +144,131 @@ const App = () => {
                 }
             }}
         >
+            <div className='App'>
                 <Header/>
-                <div>
-                    <button
-                        onMouseDown={event => {
-                            event.preventDefault()
-                            CustomEditor.toggleMark(editor, 'bold')
-                        }}
-                    >
-                        Bold
-                    </button>
-                    <button
-                        onMouseDown={event => {
-                            event.preventDefault()
-                            CustomEditor.toggleMark(editor, 'italic')
-                        }}
-                    >
-                        Italic
-                    </button>
-                    <button
-                        onMouseDown={event => {
-                            event.preventDefault()
-                            CustomEditor.toggleMark(editor, 'code')
-                        }}
-                    >
-                        Code
-                    </button>
-                    <button
-                        onMouseDown={event => {
-                            event.preventDefault()
-                            CustomEditor.toggleMark(editor, 'underline')
-                        }}
-                    >
-                        Underline
-                    </button>
-                    <button
-                        onMouseDown={event => {
-                            event.preventDefault()
-                            CustomEditor.toggleBlock(editor, 'left')
-                        }}
-                    >
-                        Left
-                    </button>
-                    <button
-                        onMouseDown={event => {
-                            event.preventDefault()
-                            CustomEditor.toggleBlock(editor, 'center')
-                        }}
-                    >
-                        Center
-                    </button>
-                    <button
-                        onMouseDown={event => {
-                            event.preventDefault()
-                            CustomEditor.toggleBlock(editor, 'right')
-                        }}
-                    >
-                        Right
-                    </button>
-                    <button
-                        onMouseDown={event => {
-                            event.preventDefault()
-                            CustomEditor.toggleBlock(editor, 'justify')
-                        }}
-                    >
-                        Justify
-                    </button>
-                    <button
-                        onMouseDown={event => {
-                            event.preventDefault()
-                            CustomEditor.toggleBlock(editor, 'bulleted-list')
-                        }}
-                    >
-                        Bulleted List
-                    </button>
-                    <button
-                        onMouseDown={event => {
-                            event.preventDefault()
-                            CustomEditor.toggleBlock(editor, 'numbered-list')
-                        }}
-                    >
-                        Numbered List
-                    </button>
-                </div>
-                <Editable 
-                    editor={editor}
-                    renderElement={renderElement}
-                    renderLeaf={renderLeaf}
-                    placeholder="Enter some rich text..."
-                    onKeyDown={event => {
-                        if(!event.ctrlKey){
-                            return
-                        }
-
-                        switch(event.key){
-                            case 'b': {
+                <div className='container'>
+                    <div className='area-buttons'>
+                        <button
+                            onMouseDown={event => {
                                 event.preventDefault()
                                 CustomEditor.toggleMark(editor, 'bold')
-                                break
-                            }
-                            case 'i': {
+                            }}
+                        >
+                            <FaBold/>
+                        </button>
+                        <button
+                            onMouseDown={event => {
                                 event.preventDefault()
                                 CustomEditor.toggleMark(editor, 'italic')
-                                break
-                            }
-                            case '`': {
+                            }}
+                        >
+                            <FaItalic/>
+                        </button>
+                        <button
+                            onMouseDown={event => {
                                 event.preventDefault()
                                 CustomEditor.toggleMark(editor, 'code')
-                                break
-                            }
-                            case 'u': {
+                            }}
+                        >
+                            <FaCode/>
+                        </button>
+                        <button
+                            onMouseDown={event => {
                                 event.preventDefault()
                                 CustomEditor.toggleMark(editor, 'underline')
-                                break
+                            }}
+                        >
+                            <FaUnderline/>
+                        </button>
+                        <button
+                            onMouseDown={event => {
+                                event.preventDefault()
+                                CustomEditor.toggleBlock(editor, 'left')
+                            }}
+                        >
+                            <FaAlignLeft/>
+                        </button>
+                        <button
+                            onMouseDown={event => {
+                                event.preventDefault()
+                                CustomEditor.toggleBlock(editor, 'center')
+                            }}
+                        >
+                            <FaAlignCenter/>
+                        </button>
+                        <button
+                            onMouseDown={event => {
+                                event.preventDefault()
+                                CustomEditor.toggleBlock(editor, 'right')
+                            }}
+                        >
+                            <FaAlignRight/>
+                        </button>
+                        <button
+                            onMouseDown={event => {
+                                event.preventDefault()
+                                CustomEditor.toggleBlock(editor, 'justify')
+                            }}
+                        >
+                            <FaAlignJustify/>
+                        </button>
+                        <button
+                            onMouseDown={event => {
+                                event.preventDefault()
+                                CustomEditor.toggleBlock(editor, 'bulleted-list')
+                            }}
+                        >
+                            <FaListUl/>
+                        </button>
+                        <button
+                            onMouseDown={event => {
+                                event.preventDefault()
+                                CustomEditor.toggleBlock(editor, 'numbered-list')
+                            }}
+                        >
+                            <FaListOl/>
+                        </button>
+                    </div>
+                    <hr/>
+                    <Editable 
+                        editor={editor}
+                        renderElement={renderElement}
+                        renderLeaf={renderLeaf}
+                        placeholder="Enter some rich text..."
+                        onKeyDown={event => {
+                            if(!event.ctrlKey){
+                                return
                             }
-                            default:
-                                
-                        }
 
-                    }}
-                />
+                            switch(event.key){
+                                case 'b': {
+                                    event.preventDefault()
+                                    CustomEditor.toggleMark(editor, 'bold')
+                                    break
+                                }
+                                case 'i': {
+                                    event.preventDefault()
+                                    CustomEditor.toggleMark(editor, 'italic')
+                                    break
+                                }
+                                case '`': {
+                                    event.preventDefault()
+                                    CustomEditor.toggleMark(editor, 'code')
+                                    break
+                                }
+                                case 'u': {
+                                    event.preventDefault()
+                                    CustomEditor.toggleMark(editor, 'underline')
+                                    break
+                                }
+                                default:
+                                    
+                            }
+
+                        }}
+                    />
+                </div>
+            </div>
         </Slate>
     )
 }

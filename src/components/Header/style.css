@@ -9,6 +9,10 @@ header{
     padding: 0 24px;
 }
 
+header h2{
+    margin-left: 50px;
+}
+
 header a{
     color: #EDEDED;
     font-size: 17px;
